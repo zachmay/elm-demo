@@ -1,0 +1,449 @@
+var _evancz$start_app$Demo$candidateEncoder = function (candidate) {
+	return _elm_lang$core$Json_Encode$object(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'id',
+				_1: _elm_lang$core$Json_Encode$int(candidate.id)
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'name',
+					_1: _elm_lang$core$Json_Encode$string(candidate.name)
+				},
+				_1: {
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'bandVotes',
+						_1: _elm_lang$core$Json_Encode$int(candidate.bandVotes)
+					},
+					_1: {
+						ctor: '::',
+						_0: {
+							ctor: '_Tuple2',
+							_0: 'albumVotes',
+							_1: _elm_lang$core$Json_Encode$int(candidate.albumVotes)
+						},
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
+};
+var _evancz$start_app$Demo$delete = function (url) {
+	return _elm_lang$http$Http$request(
+		{
+			method: 'DELETE',
+			headers: {ctor: '[]'},
+			url: url,
+			body: _elm_lang$http$Http$emptyBody,
+			expect: _elm_lang$http$Http$expectStringResponse(
+				function (_p0) {
+					return _elm_lang$core$Result$Ok(
+						{ctor: '_Tuple0'});
+				}),
+			timeout: _elm_lang$core$Maybe$Nothing,
+			withCredentials: false
+		});
+};
+var _evancz$start_app$Demo$put = F3(
+	function (url, body, decoder) {
+		return _elm_lang$http$Http$request(
+			{
+				method: 'PUT',
+				headers: {ctor: '[]'},
+				url: url,
+				body: body,
+				expect: _elm_lang$http$Http$expectJson(decoder),
+				timeout: _elm_lang$core$Maybe$Nothing,
+				withCredentials: false
+			});
+	});
+var _evancz$start_app$Demo$httpHelper = F3(
+	function (errorMapper, successMapper, result) {
+		var _p1 = result;
+		if (_p1.ctor === 'Err') {
+			return errorMapper(_p1._0);
+		} else {
+			return successMapper(_p1._0);
+		}
+	});
+var _evancz$start_app$Demo$updateWithNew = F2(
+	function (newCandidate, _p2) {
+		return newCandidate;
+	});
+var _evancz$start_app$Demo$updateById = F3(
+	function (updater, id, candidate) {
+		return _elm_lang$core$Native_Utils.eq(candidate.id, id) ? updater(candidate) : candidate;
+	});
+var _evancz$start_app$Demo$initialModel = {
+	candidates: {ctor: '[]'},
+	nextId: 2,
+	currentNameValue: '',
+	debug: ''
+};
+var _evancz$start_app$Demo$Candidate = F4(
+	function (a, b, c, d) {
+		return {name: a, bandVotes: b, albumVotes: c, id: d};
+	});
+var _evancz$start_app$Demo$candidateDecoder = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_evancz$start_app$Demo$Candidate,
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'bandVotes', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode$field, 'albumVotes', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$int));
+var _evancz$start_app$Demo$candidateListDecoder = _elm_lang$core$Json_Decode$list(_evancz$start_app$Demo$candidateDecoder);
+var _evancz$start_app$Demo$Model = F4(
+	function (a, b, c, d) {
+		return {candidates: a, nextId: b, currentNameValue: c, debug: d};
+	});
+var _evancz$start_app$Demo$UpdateCandidate = function (a) {
+	return {ctor: 'UpdateCandidate', _0: a};
+};
+var _evancz$start_app$Demo$OnError = function (a) {
+	return {ctor: 'OnError', _0: a};
+};
+var _evancz$start_app$Demo$putCandidate = function (candidate) {
+	var body = _elm_lang$http$Http$jsonBody(
+		_evancz$start_app$Demo$candidateEncoder(candidate));
+	var url = A2(
+		_elm_lang$core$Basics_ops['++'],
+		'http://localhost:3000/candidates/',
+		_elm_lang$core$Basics$toString(candidate.id));
+	return A2(
+		_elm_lang$http$Http$send,
+		A2(_evancz$start_app$Demo$httpHelper, _evancz$start_app$Demo$OnError, _evancz$start_app$Demo$UpdateCandidate),
+		A3(_evancz$start_app$Demo$put, url, body, _evancz$start_app$Demo$candidateDecoder));
+};
+var _evancz$start_app$Demo$SetCandidateList = function (a) {
+	return {ctor: 'SetCandidateList', _0: a};
+};
+var _evancz$start_app$Demo$getCandidateList = A2(
+	_elm_lang$http$Http$send,
+	A2(_evancz$start_app$Demo$httpHelper, _evancz$start_app$Demo$OnError, _evancz$start_app$Demo$SetCandidateList),
+	A2(_elm_lang$http$Http$get, 'http://localhost:3000/candidates', _evancz$start_app$Demo$candidateListDecoder));
+var _evancz$start_app$Demo$RemoveCandidate = function (a) {
+	return {ctor: 'RemoveCandidate', _0: a};
+};
+var _evancz$start_app$Demo$deleteCandidate = function (candidate) {
+	var url = A2(
+		_elm_lang$core$Basics_ops['++'],
+		'http://localhost:3000/candidates/',
+		_elm_lang$core$Basics$toString(candidate.id));
+	return A2(
+		_elm_lang$http$Http$send,
+		A2(
+			_evancz$start_app$Demo$httpHelper,
+			_evancz$start_app$Demo$OnError,
+			function (_p3) {
+				return _evancz$start_app$Demo$RemoveCandidate(candidate);
+			}),
+		_evancz$start_app$Demo$delete(url));
+};
+var _evancz$start_app$Demo$update = F2(
+	function (msg, model) {
+		var _p4 = msg;
+		switch (_p4.ctor) {
+			case 'SetCandidateList':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{candidates: _p4._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'OnError':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							debug: A2(
+								_elm_lang$core$Basics_ops['++'],
+								model.debug,
+								_elm_lang$core$Basics$toString(_p4._0))
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SuggestName':
+				var newId = model.nextId + 1;
+				var newCandidate = {name: model.currentNameValue, bandVotes: 0, albumVotes: 0, id: model.nextId};
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							candidates: A2(
+								_elm_lang$core$Basics_ops['++'],
+								model.candidates,
+								{
+									ctor: '::',
+									_0: newCandidate,
+									_1: {ctor: '[]'}
+								}),
+							nextId: newId
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'CurrentNameUpdate':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{currentNameValue: _p4._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'BandVote':
+				var _p5 = _p4._0;
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _evancz$start_app$Demo$putCandidate(
+						_elm_lang$core$Native_Utils.update(
+							_p5,
+							{bandVotes: _p5.bandVotes + 1}))
+				};
+			case 'AlbumVote':
+				var _p6 = _p4._0;
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _evancz$start_app$Demo$putCandidate(
+						_elm_lang$core$Native_Utils.update(
+							_p6,
+							{albumVotes: _p6.albumVotes + 1}))
+				};
+			case 'UpdateCandidate':
+				var _p7 = _p4._0;
+				var replaceCandidate = A2(
+					_evancz$start_app$Demo$updateById,
+					_elm_lang$core$Basics$always(_p7),
+					_p7.id);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							candidates: A2(_elm_lang$core$List$map, replaceCandidate, model.candidates)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'RequestDelete':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _evancz$start_app$Demo$deleteCandidate(_p4._0)
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							candidates: A2(
+								_elm_lang$core$List$filter,
+								function (c) {
+									return !_elm_lang$core$Native_Utils.eq(c.id, _p4._0.id);
+								},
+								model.candidates)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _evancz$start_app$Demo$RequestDelete = function (a) {
+	return {ctor: 'RequestDelete', _0: a};
+};
+var _evancz$start_app$Demo$AlbumVote = function (a) {
+	return {ctor: 'AlbumVote', _0: a};
+};
+var _evancz$start_app$Demo$BandVote = function (a) {
+	return {ctor: 'BandVote', _0: a};
+};
+var _evancz$start_app$Demo$viewCandidate = function (candidate) {
+	return A2(
+		_elm_lang$html$Html$tr,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$td,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(candidate.name),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$td,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							_elm_lang$core$Basics$toString(candidate.bandVotes)),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$button,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(
+										_evancz$start_app$Demo$BandVote(candidate)),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Vote Band'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$td,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(
+								_elm_lang$core$Basics$toString(candidate.albumVotes)),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(
+											_evancz$start_app$Demo$AlbumVote(candidate)),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Vote Album'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$td,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(
+											_evancz$start_app$Demo$RequestDelete(candidate)),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Delete'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
+};
+var _evancz$start_app$Demo$CurrentNameUpdate = function (a) {
+	return {ctor: 'CurrentNameUpdate', _0: a};
+};
+var _evancz$start_app$Demo$SuggestName = {ctor: 'SuggestName'};
+var _evancz$start_app$Demo$view = function (model) {
+	var candidateRows = A2(_elm_lang$core$List$map, _evancz$start_app$Demo$viewCandidate, model.candidates);
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$h1,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Band/Album Name Manager'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$input,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$type_('text'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onInput(_evancz$start_app$Demo$CurrentNameUpdate),
+									_1: {ctor: '[]'}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$button,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(_evancz$start_app$Demo$SuggestName),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Submit'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$table,
+						{ctor: '[]'},
+						candidateRows),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$pre,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(model.debug),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
+};
+var _evancz$start_app$Demo$main = _elm_lang$html$Html$program(
+	{
+		init: {ctor: '_Tuple2', _0: _evancz$start_app$Demo$initialModel, _1: _evancz$start_app$Demo$getCandidateList},
+		subscriptions: function (_p8) {
+			return _elm_lang$core$Platform_Sub$none;
+		},
+		view: _evancz$start_app$Demo$view,
+		update: _evancz$start_app$Demo$update
+	})();
